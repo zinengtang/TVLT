@@ -15,11 +15,11 @@ Learning **compact** visual-linguistic representation from low-level continuous 
   <big><b>Zineng Tang, Jaemin Cho, Yixin Nie, Mohit Bansal</b></big>
 </p> -->
 
-Transformers for Vision-Language (VL) representation learning unanimously rely on text-based inputs.  
+Transformers for Vision-Language (VL) representation learning heavily rely on text-based inputs. (Some works use audio channel as auxiliary channels)  
 
 TVLT takes audio and visual inputs for VL representation learning with **minimal modality-specific design** and **without text-specific modules such as tokenization and automatic speech recognition (ASR)**.  
 
-TVLT is pre-trained with vision-audio mathcing and mask autoencoding **(mask and then reconstruct the continuous input of video frames and audio spectrogram)**, following the previous idea of [training scalable vision learners with mask autoencoding on images (the Vision-BERT)](https://arxiv.org/abs/2111.06377).  
+TVLT is pre-trained with vision-audio mathcing and mask autoencoding **(mask and then reconstruct the continuous input of video frames and audio spectrogram)**, following the previous idea of [training scalable vision learners with mask autoencoding on images (the Vision-BERT)](https://arxiv.org/abs/2111.06377).    
 
 <p align="center">
   <img align="middle" width="800" src="assets/architecture.png"/>

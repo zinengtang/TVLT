@@ -127,6 +127,13 @@ load_hub_path="TVLT.ckpt"
 
 See [Folder Structure](CODE.md)
 
+## Updates
+- [x] Initial Code Release
+- [x] Notebook Demos
+- [x] Colab
+- [ ] Upload TTS audios for VQA
+...
+
 
 ## Recommanded Usage
 

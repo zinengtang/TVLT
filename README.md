@@ -131,8 +131,9 @@ See [Folder Structure](CODE.md)
 - [x] Initial Code Release
 - [x] Notebook Demos
 - [x] Colab
-- [ ] Upload TTS audios for VQA
-...
+- [ ] Upload TTS audios for VQA   
+
+**...**
 
 
 ## Recommanded Usage

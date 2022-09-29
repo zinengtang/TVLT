@@ -131,7 +131,7 @@ See [Folder Structure](CODE.md)
 - [x] Initial Code Release
 - [x] Notebook Demos
 - [x] Colab
-- [ ] Upload TTS audios for VQA   
+- [ ] Release TTS question audios for VQA (We convert all the textual questions of VQAv2 to audio using Google TTS API.)   
 
 **...**
 

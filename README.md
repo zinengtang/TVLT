@@ -131,7 +131,7 @@ See [Folder Structure](CODE.md)
 ## Recommanded Usage
 
 In our experiment, we pre-train TVLT on HowTo100M and YTtemporal videos. However, we recommend to unlock the power of TVLT by pre-training TVLT on large-scale videos for more generic Vision-Language representation.  
-The resultant model can be either use to directly process video (with the audio channel) inputs such as audio-image/video retrieval, audio-VQA, TTS-based VQA or to extract visual-acoustic features for other tasks such as speech translation, multimodal content understanding, etc.
+The resultant models can be either use to directly process video (with the audio channel) inputs such as audio-image/video retrieval, audio-VQA, TTS-based VQA or to extract visual-acoustic features for other tasks such as speech translation, multimodal content understanding, etc.
 
 
 ## Citation

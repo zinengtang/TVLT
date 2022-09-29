@@ -1,6 +1,6 @@
 # TVLT
 
-### **[TVLT: Textless Vision-Language Transformer]() [NeurIPS 2022 [bib](https://github.com/zinengtang/TVLT#citation)]**  
+### **[TVLT: Textless Vision-Language Transformer](https://arxiv.org/abs/2209.14156) [NeurIPS 2022 [bib](https://github.com/zinengtang/TVLT#citation)]**  
 [Zineng Tang*](https://zinengtang.github.io/), [Jaemin Cho*](https://j-min.io/), [Yixin Nie*](https://easonnie.github.io/), [Mohit Bansal](https://www.cs.unc.edu/~mbansal/)   
 
 Learning **compact** visual-linguistic representation from low-level continuous visual 👁 and audio👂 perception signal **without assuming the prior existence of written texts or tokens**

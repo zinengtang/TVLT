@@ -51,11 +51,11 @@ class YTTemporalDataset(BaseVideoDataset):
         video_path = os.path.join(self.metadata_dir, 'videos_yt', self.keys[index])
 
         ret = dict()
-        ret.update(self._get_video_audio(index, video_path))
+        ret.update(self._get_video_audio(index, video_path, rand_sample=True))
 
         for i in range(self.draw_false_video):
             random_index = random.randint(0, len(self.keys) - 1)
             video_path_f = os.path.join(self.metadata_dir, 'videos_yt', self.keys[random_index])
-            ret.update(self._get_false_video(i, video_path_f))
+            ret.update(self._get_false_video(i, video_path_f, rand_sample=True))
 
         return ret

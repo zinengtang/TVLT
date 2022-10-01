@@ -68,8 +68,8 @@ class BaseVideoDataset(torch.utils.data.Dataset):
     def _get_audio_span(self, spans):
         return {'audio_spans': spans}
     
-    def _get_video(self, index, video_path, timestamp=None):
-        video_data = self.video_loader.video_to_tensor(video_path, timestamp)
+    def _get_video(self, index, video_path, timestamp=None, rand_sample=False):
+        video_data = self.video_loader.video_to_tensor(video_path, timestamp, rand_sample=rand_sample)
         return {"video_data": video_data,
                 "v_index": index,}   
 
@@ -79,16 +79,16 @@ class BaseVideoDataset(torch.utils.data.Dataset):
                 "raw_index": index,
                 "a_index": index,}   
     
-    def _get_video_audio(self, index, path, timestamp=None):
-        video_data, audio_data = self.video_loader.video_audio_to_tensor(path, timestamp)
+    def _get_video_audio(self, index, path, timestamp=None, rand_sample=False):
+        video_data, audio_data = self.video_loader.video_audio_to_tensor(path, timestamp, rand_sample=rand_sample)
         return {"video_data": video_data,
                 "v_index": index,
                 "audio_data": audio_data,
                 "raw_index": index,
                 "a_index": index,}
     
-    def _get_false_video(self, rep, video_path, timestamp=None):        
-        video_data = self.video_loader.video_to_tensor(video_path, timestamp)
+    def _get_false_video(self, rep, video_path, timestamp=None, rand_sample=False):   
+        video_data = self.video_loader.video_to_tensor(video_path, timestamp, rand_sample=rand_sample)
         return {f"false_video_{rep}": video_data}
     
     def _get_false_audio(self, rep, video_path, timestamp=None):        

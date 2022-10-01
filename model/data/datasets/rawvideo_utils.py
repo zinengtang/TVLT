@@ -164,13 +164,21 @@ class RawVideoExtractor():
                 
         return audio
         
-    def video_to_tensor(self, path, timestamp=None, get_video=True, get_audio=True):
+    def video_to_tensor(self, path, timestamp=None, get_video=True, get_audio=True, rand_sample=False):
 
         try:
             video = VideoReader(path)
 
             framerate = video.get_avg_fps()
             video_len = len(video)/framerate
+            
+            if rand_sample and timestamp is None:
+                video_clip_length = 15.0
+                if video_len >= video_clip_length:
+                    start = (np.random.rand(1)*(video_len-(video_clip_length-0.1)))[0]
+                    timestamp = [start, start + (video_clip_length-0.1)]
+                else:
+                    timestamp = [0, video_len-0.1]
 
             if timestamp is not None:
                 start, end = time_to_indices(video, timestamp)
@@ -196,12 +204,20 @@ class RawVideoExtractor():
         return video
     
     
-    def video_audio_to_tensor(self, path, timestamp=None):
+    def video_audio_to_tensor(self, path, timestamp=None, rand_sample=False):
 
         try:
             video = VideoReader(path)
             framerate = video.get_avg_fps()
             video_len = len(video)/video.get_avg_fps()
+            
+            if rand_sample and timestamp is None:
+                video_clip_length = 15.0
+                if video_len >= video_clip_length:
+                    start = (np.random.rand(1)*(video_len-(video_clip_length-0.1)))[0]
+                    timestamp = [start, start + (video_clip_length-0.1)]
+                else:
+                    timestamp = [0, video_len-0.1]
 
             if timestamp is not None:
                 start, end = time_to_indices(video, timestamp)            

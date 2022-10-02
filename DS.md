@@ -57,7 +57,7 @@ bash scripts/finetune_vqa.sh
 
 ### MSRVTT
 
-Download meta files from [frozen-in-time](https://github.com/m-bain/frozen-in-time) or directly [link](wget https://www.robots.ox.ac.uk/~maxbain/frozen-in-time/data/MSRVTT.zip) and videos and organize the data structures as below
+Download meta files from [frozen-in-time](https://github.com/m-bain/frozen-in-time) or directly [link](https://www.robots.ox.ac.uk/~maxbain/frozen-in-time/data/MSRVTT.zip) and videos and organize the data structures as below
 
 ```
 Dataset

@@ -532,7 +532,7 @@ class TVLT(nn.Module):
             decoder_x = self.decoder_embed(x)
 
             if audio is not None:
-                decoder_x_a = decoder_x[:, 1:1+x_a.size(1)]
+                decoder_x_a = decoder_x[:, :x_a.size(1)]
                 decoder_x_a = self.cat_mask(
                     self.mask_token_a, decoder_x_a, ids_restore_a)
                 decoder_x_a += self.decoder_freq_embed.repeat(

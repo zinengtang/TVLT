@@ -111,19 +111,19 @@ class RawVideoExtractor():
     def audio_to_tensor(self, path, timestamp=None):
 
         try:
-            if path.endswith('mp3') or path.endswith('wav') or path.endswith('flac'):
+            if path.endswith(('mp3', 'wav', 'flac')):
                 audio, org_sr = torchaudio.load(path)
                 if org_sr != self.sr:
                     audio = torchaudio.functional.resample(audio, orig_freq=org_sr, new_freq=self.sr)
                 audio = audio.mean(0).numpy()      
                 if timestamp is not None:
-                    start, end = int(sr * timestamp[0]), int(sr * timestamp[1])
+                    start, end = int(self.sr * timestamp[0]), int(self.sr * timestamp[1])
                     audio = audio[start: end]
 
                 audio = preprocess_audio(audio, sr=self.sr)
                 audio = audio[:, :self.audio_size]
 
-            elif path.endswith('avi') or path.endswith('mp4'):
+            elif path.endswith(('avi', 'mp4')):
                 audio = AudioFileClip(path)
                 org_sr = audio.fps
                 if timestamp is not None:

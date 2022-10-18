@@ -34,7 +34,7 @@ bash scripts/finetune_moseiemo.sh
 
 ### VQAv2
 
-Download VQAv2 [[link]](https://visualqa.org/) meta files and audios and images and organize the data structures as below
+Download VQAv2 [[link]](https://visualqa.org/) meta files and audios [[link]](https://nlp.cs.unc.edu/data/TVLT/vqa_dataset/) and images and organize the data structures as below
 
 ```
 Dataset

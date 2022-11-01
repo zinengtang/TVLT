@@ -40,9 +40,9 @@ class MOSEIEMODataset(BaseVideoDataset):
             
         elif self.split=='val':
             
-            self.labels = pd.read_csv(self.metadata_dir+'labels_emotion/label_file_test.csv')
+            self.labels = pd.read_csv(self.metadata_dir+'labels_emotion/label_file_valid.csv')
             self.keys = list(self.labels['FileName'])
-            self.metadata_dir = self.metadata_dir + 'test/'
+            self.metadata_dir = self.metadata_dir + 'valid/'
             
         elif self.split=='test':
              

@@ -6,7 +6,7 @@ data_root='./dataset/cmumosei'
 
 ### CMU-MOSEI
 
-Download CMU-MOSEI [[link]](http://multicomp.cs.cmu.edu/resources/cmu-mosei-dataset/) meta files and videos and organize the data structures as below
+Download CMU-MOSEI [[link]](https://drive.google.com/file/d/10N5J_8N6ajecYvvIUXPsH8XoOF9OF1Ra/view?usp=sharing) meta files and videos and organize the data structures as below
 
 ```
 Dataset

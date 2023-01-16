@@ -26,12 +26,17 @@ TVLT is pre-trained with vision-audio mathcing and mask autoencoding **(mask and
 </p>
 
 
-TVLT attains performance comparable to its text-based counterpart on various multimodal tasks, such as visual question answering and multimodal sentiment analysis, **with 28x faster inference speed and only 1/3 of the parameters**.
+<details>
+  <summary>More</summary>
+  
 
-<p align="center">
-  <img align="middle" width="800" src="assets/teaser.png"/>
-</p>
+  TVLT attains performance comparable to its text-based counterpart on various multimodal tasks, such as visual question answering and multimodal sentiment analysis, **with 28x faster inference speed and only 1/3 of the parameters**.
 
+  <p align="center">
+    <img align="middle" width="800" src="assets/teaser.png"/>
+  </p>
+  
+</details>
 
 ## Install
 ### Setup `python` environment

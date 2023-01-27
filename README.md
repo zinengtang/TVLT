@@ -82,7 +82,7 @@ Getting familiar with TVLT by trying the following demos.
 ## Training
 
 ### Pretraining (Data + scripts) -> [TVLT Pretraining](PT.md)
-
+Download MAE checkpoint [here](https://github.com/facebookresearch/mae)
 ```
 # Example
 bash scripts/pretrain_mae_vam.sh

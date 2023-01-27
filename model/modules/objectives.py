@@ -11,6 +11,7 @@ import torch.nn.functional as F
 from torch.utils.data.distributed import DistributedSampler
 from einops import rearrange
 
+from model.modules.dist_utils import all_gather
 
 def cost_matrix_cosine(x, y, eps=1e-5):
     """Compute cosine distnace across every pairs of x, y (batched)
@@ -598,8 +599,10 @@ def compute_vrar_recall(pl_module):
 
         video_batch_score = torch.cat(video_batch_score)
         rank_scores.append(video_batch_score.cpu().tolist()) 
-    torch.distributed.barrier()
+
     
+    torch.distributed.barrier()
+    rank_scores = all_gather(rank_scores)
     
     av_rank_scores = np.array(rank_scores).transpose(1,0,2)
     print(av_rank_scores.shape)

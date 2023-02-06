@@ -69,7 +69,7 @@ def config():
     weight_decay = 0.001
     decay_power = 1
     max_epoch = 100
-    max_steps = 10
+    max_steps = 1e6
     warmup_steps = 2500
 
     # Downstream Setting
@@ -156,6 +156,7 @@ def task_finetune_msrvtt():
     draw_false_video = 23
     learning_rate = 1e-5
     max_epoch = 40
+    max_steps = 1e5
     
     
 @ex.named_config

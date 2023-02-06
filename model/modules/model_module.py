@@ -27,6 +27,8 @@ class Transformer(pl.LightningModule):
         self.patch_size = config["patch_size"]
         self.audio_patch_size = config["audio_patch_size"]
         self.warmup_steps = config["warmup_steps"]
+        self.max_epoch = config["max_epoch"]
+        self.max_steps = config["max_steps"]
         
         self.transformer = getattr(tvlt, config["model_type"])(config=config)
         
@@ -201,6 +203,7 @@ class Transformer(pl.LightningModule):
         scheduler = get_cosine_schedule_with_warmup(
             optimizer,
             num_warmup_steps=self.warmup_steps,
+            num_training_steps=self.max_steps,
         )
         sched = {"scheduler": scheduler, "interval": "step"}
         return (

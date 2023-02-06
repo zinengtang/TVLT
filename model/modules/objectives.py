@@ -481,8 +481,12 @@ def arc_test_wrapup(outs, caplen, model_name):
 
     
 def compute_vam(pl_module, batch):
-    pos_len = len(batch["audio_data"]) // 2
-    neg_len = len(batch["audio_data"]) - pos_len
+    if len(batch["audio_data"]) > 1:
+        pos_len = len(batch["audio_data"]) // 2
+        neg_len = len(batch["audio_data"]) - pos_len
+    else:
+        pos_len = 1 if np.random.rand() < 0.5 else 0
+        neg_len = 1 - pos_len
     vam_labels = torch.cat([torch.ones(pos_len), torch.zeros(neg_len)]).to(
         pl_module.device
     )
@@ -497,7 +501,6 @@ def compute_vam(pl_module, batch):
     batch["video_data"] = vam_videos
 
     infer = pl_module.infer(batch, mask_text=False, mask_visual=False, use_mae=False)
-
     vam_logits = pl_module.transformer.matching_score(infer["cls_feats"])
     vam_loss = F.binary_cross_entropy_with_logits(vam_logits.squeeze(), vam_labels.squeeze())
     ret = {
@@ -517,6 +520,38 @@ def compute_vam(pl_module, batch):
     return ret
 
     
+def compute_vatr(pl_module, batch):
+    _bs, _c, _h, _w = batch["audio_data"].shape
+    false_len = pl_module.hparams.config["draw_false_video"]
+    false_video = torch.stack(
+        [batch[f"false_video_{i}"] for i in range(false_len)], dim=1
+    )
+
+    vatr_video = torch.cat([batch["video_data"].unsqueeze(1), false_video], dim=1)
+    vatr_audio = batch["audio_data"].unsqueeze(1).expand(_bs, false_len + 1, _c, _h, _w)
+
+    infer = pl_module.infer(
+        {
+            "audio_data": rearrange(vatr_audio, "bs fs c h w -> (bs fs) c h w"),
+            "video_data": rearrange(vatr_video, "bs fs c t h w -> (bs fs) c t h w"),
+        }
+    )
+    score = pl_module.transformer.rank_output(infer["cls_feats"])[:, 0]
+    score = rearrange(score, "(bs fs) -> bs fs", bs=_bs, fs=false_len + 1)
+    answer = torch.zeros(_bs).to(score).long()
+    vatr_loss = F.cross_entropy(score, answer)
+
+    ret = {
+        "vatr_loss": vatr_loss,
+    }
+
+    phase = "train" if pl_module.training else "val"
+    vatr_loss = getattr(pl_module, f"{phase}_vatr_loss")(ret["vatr_loss"])
+    vatr_acc = getattr(pl_module, f"{phase}_vatr_accuracy")(score, answer)
+    pl_module.log(f"vatr/{phase}/vatr_loss", vatr_loss)
+    pl_module.log(f"vatr/{phase}/vatr_accuracy", vatr_acc)
+
+    return ret
 
 @torch.no_grad()
 def compute_vrar_recall(pl_module):
@@ -524,9 +559,10 @@ def compute_vrar_recall(pl_module):
     audio_dset.tokenizer = pl_module.trainer.datamodule.dms[0].tokenizer
     audio_loader = torch.utils.data.DataLoader(
         audio_dset,
-        batch_size=64,
+        batch_size=4,
+        shuffle=False,
         num_workers=pl_module.hparams.config["num_workers"],
-        pin_memory=False,
+        pin_memory=True,
         collate_fn=functools.partial(
             audio_dset.collate,
             mlm_collator=pl_module.trainer.datamodule.dms[0].mlm_collator,
@@ -542,7 +578,7 @@ def compute_vrar_recall(pl_module):
         video_dset,
         batch_size=1,
         num_workers=pl_module.hparams.config["num_workers"],
-        pin_memory=False,
+        pin_memory=True,
         sampler=dist_sampler,
         collate_fn=functools.partial(
             video_dset.collate,
@@ -569,14 +605,15 @@ def compute_vrar_recall(pl_module):
             [_b["video_data"].to(pl_module.device),
              _b["v_index"],
             ],
-            
         )
         
     rank_scores = list()
-    rank_vids = list()
+    rank_iids = list()
 
+    num_samples = 10
+    count = 0
     for video_batch in tqdm.tqdm(video_preload, desc="rank loop"):
-
+        count += 1
         _ve, _vid = video_batch
         _, l, c, h, w = _ve.shape
 
@@ -593,58 +630,50 @@ def compute_vrar_recall(pl_module):
                         "video_data": ve,
                         }
                     )["cls_feats"]
-                )
+                )[:, 0]
                 score = F.sigmoid(score)
             video_batch_score.append(score)
-
+    
         video_batch_score = torch.cat(video_batch_score)
         rank_scores.append(video_batch_score.cpu().tolist()) 
+        rank_iids.append(_vid)
 
-    
-    torch.distributed.barrier()
-    rank_scores = all_gather(rank_scores)
-    
-    av_rank_scores = np.array(rank_scores).transpose(1,0,2)
-    print(av_rank_scores.shape)
-    av_rank = {}
-    for i, item in enumerate(av_rank_scores):
-        av_rank[i] = np.concatenate([np.arange(len(item))[:, None], item], 1)
-    
-    vr_r1 = torch.tensor(0.0)
-    vr_r5 = torch.tensor(0.0)
-    vr_r10 = torch.tensor(0.0)
-    ar_r1 = torch.tensor(0.0)
-    ar_r5 = torch.tensor(0.0)
-    ar_r10 = torch.tensor(0.0)
-    
-    for i_a in av_rank:
-        tmp = sorted(av_rank[i_a], key=lambda d: -d[1])
-        p = [d[0] for d in tmp].index(i_a)+1
-
-        if p<=1:
-            vr_r1 += 1.0/len(av_rank)
-        if p<=5:
-            vr_r5 += 1.0/len(av_rank)
-        if p<=10:
-            vr_r10 += 1.0/len(av_rank)
+        if count == num_samples:
+            break
             
-    va_rank_scores = np.array(rank_scores)
-    va_rank = {}
-    for i, item in enumerate(rank_scores):
-        va_rank[i] = np.concatenate([np.arange(len(item))[:, None], item], 1)
-    
-    for i_v in va_rank:
-        tmp = sorted(va_rank[i_v], key=lambda d: -d[1])
-        p = [d[0] for d in tmp].index(i_v)+1
+    torch.distributed.barrier()
+    gather_rank_scores = all_gather(rank_scores)
+    gather_rank_iids = all_gather(rank_iids)
 
-        if p<=1:
-            ar_r1 += 1.0/len(va_rank)
-        if p<=5:
-            ar_r5 += 1.0/len(va_rank)
-        if p<=10:
-            ar_r10 += 1.0/len(va_rank)
+    iids = torch.tensor(gather_rank_iids)
+    iids = iids.view(-1)
+    scores = torch.tensor(gather_rank_scores)
+    scores = scores.view(len(iids), -1)
 
-    return (vr_r1, vr_r5, vr_r10, ar_r1, ar_r5, ar_r10)
+    topk10 = scores.topk(10, dim=1)
+    topk5 = scores.topk(5, dim=1)
+    topk1 = scores.topk(1, dim=1)
+    topk10_iids = aids[topk10.indices]
+    topk5_iids = aids[topk5.indices]
+    topk1_iids = aids[topk1.indices]
+
+    tr_r10 = (iids.unsqueeze(1) == topk10_iids).float().max(dim=1)[0].mean()
+    tr_r5 = (iids.unsqueeze(1) == topk5_iids).float().max(dim=1)[0].mean()
+    tr_r1 = (iids.unsqueeze(1) == topk1_iids).float().max(dim=1)[0].mean()
+
+    topk10 = scores.topk(10, dim=0)
+    topk5 = scores.topk(5, dim=0)
+    topk1 = scores.topk(1, dim=0)
+    topk10_iids = iids[topk10.indices]
+    topk5_iids = iids[topk5.indices]
+    topk1_iids = iids[topk1.indices]
+
+    ir_r10 = (aids.unsqueeze(0) == topk10_iids).float().max(dim=0)[0].mean()
+    ir_r5 = (aids.unsqueeze(0) == topk5_iids).float().max(dim=0)[0].mean()
+    ir_r1 = (aids.unsqueeze(0) == topk1_iids).float().max(dim=0)[0].mean()
+
+    return (ir_r1, ir_r5, ir_r10, tr_r1, tr_r5, tr_r10)
+
 
     
 def init_weights(module):
@@ -656,4 +685,3 @@ def init_weights(module):
 
     if isinstance(module, nn.Linear) and module.bias is not None:
         module.bias.data.zero_()
-

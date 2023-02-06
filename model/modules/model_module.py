@@ -123,9 +123,13 @@ class Transformer(pl.LightningModule):
             ret.update(self.infer(batch))
             return ret
 
-        # Image Text Matching
+        # Vision Text Matching
         if "vam" in self.current_tasks:
             ret.update(objectives.compute_vam(self, batch))
+            
+        # Vision Audio Retrieval
+        if "vatr" in self.current_tasks:
+            ret.update(objectives.compute_vatr(self, batch)) 
             
         # Video Text Matching
         if "vtm" in self.current_tasks:

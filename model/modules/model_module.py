@@ -10,6 +10,7 @@ import torch.nn.functional as F
 import pytorch_lightning as pl
 
 from transformers.optimization import AdamW
+from transformers import get_cosine_schedule_with_warmup
 from model.modules import heads, objectives, model_utils
 import model.modules.tvlt as tvlt
 
@@ -25,6 +26,7 @@ class Transformer(pl.LightningModule):
         self.weight_decay = config["weight_decay"]
         self.patch_size = config["patch_size"]
         self.audio_patch_size = config["audio_patch_size"]
+        self.warmup_steps = config["warmup_steps"]
         
         self.transformer = getattr(tvlt, config["model_type"])(config=config)
         
@@ -123,13 +125,13 @@ class Transformer(pl.LightningModule):
             ret.update(self.infer(batch))
             return ret
 
-        # Vision Text Matching
+        # Video Audio Matching
         if "vam" in self.current_tasks:
             ret.update(objectives.compute_vam(self, batch))
             
-        # Vision Audio Retrieval
+        # Video Audio Retrieval
         if "vatr" in self.current_tasks:
-            ret.update(objectives.compute_vatr(self, batch)) 
+            ret.update(objectives.compute_vatr(self, batch))    
             
         # Video Text Matching
         if "vtm" in self.current_tasks:
@@ -195,4 +197,13 @@ class Transformer(pl.LightningModule):
         model_utils.epoch_wrapup(self)
 
     def configure_optimizers(self):
-        return AdamW(self.parameters(), lr=self.learning_rate, eps=1e-8, betas=(0.9, 0.98), weight_decay=self.weight_decay)
+        optimizer = AdamW(self.parameters(), lr=self.learning_rate, eps=1e-8, betas=(0.9, 0.98), weight_decay=self.weight_decay)
+        scheduler = get_cosine_schedule_with_warmup(
+            optimizer,
+            num_warmup_steps=self.warmup_steps,
+        )
+        sched = {"scheduler": scheduler, "interval": "step"}
+        return (
+            [optimizer],
+            [sched],
+        )

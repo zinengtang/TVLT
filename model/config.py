@@ -5,6 +5,7 @@ ex = Experiment("TVLT")
 def _loss_names(d):
     ret = {
         "vam": 0,
+        "vatr": 0,
         "vtm": 0,
         "mae_audio": 0,
         "mae_video": 0,
@@ -144,7 +145,7 @@ def task_finetune_vqa():
 def task_finetune_msrvtt():
     exp_name = "finetune_msrvtt"
     datasets = ["msrvtt"]
-    loss_names = _loss_names({"vam": 1})
+    loss_names = _loss_names({"vam": 1, "vatr": 1})
     batch_size = 128
     audio_size = 1024
     num_frames = 8
@@ -152,7 +153,7 @@ def task_finetune_msrvtt():
     use_audio = True 
     use_text = False
     get_va_recall_metric = True
-    draw_false_video = 1
+    draw_false_video = 23
     learning_rate = 1e-5
     max_epoch = 40
     

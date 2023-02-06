@@ -243,6 +243,13 @@ class TVLT(nn.Module):
         if config["loss_names"]["vam"] > 0 or config["loss_names"]["vtm"] > 0:
             self.matching_score = heads.MatchingHead(config["hidden_size"])
             self.matching_score.apply(objectives.init_weights)
+            
+            if config["loss_names"]["vatr"] > 0:
+                import copy
+                self.rank_output = copy.deepcopy(self.matching_score)
+                self.margin = 0.2
+                for p in self.matching_score.parameters():
+                    p.requires_grad = False
 
         if config["loss_names"]["mae_audio"] > 0:
             self.mae_score_audio = heads.MAEHead(

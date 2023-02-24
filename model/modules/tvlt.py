@@ -54,7 +54,7 @@ class Attention(nn.Module):
         attn = (q @ k.transpose(-2, -1)) * self.scale
         if mask is not None:
             attn = attn.masked_fill(
-                ~mask[:, None, None, :].bool(), float('-inf'))
+                ~mask[:, None, None, :].bool(), -1e12)
         attn = attn.softmax(dim=-1)
         attn = self.attn_drop(attn)
 

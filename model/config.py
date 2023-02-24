@@ -105,7 +105,7 @@ def task_cls_moseiemo():
     use_video = True
     use_audio = True 
     use_text = False
-    learning_rate = 1e-5
+    learning_rate = 1e-4
     max_epoch = 10
     
 
@@ -121,7 +121,7 @@ def task_cls_mosei():
     use_video = True
     use_audio = True 
     use_text = False
-    learning_rate = 1e-5
+    learning_rate = 1e-4
     max_epoch = 10
        
 
